@@ -46,7 +46,11 @@ cat("engage h2o cluster \n")
 h2o.init(nthreads=2, max_mem_size="6G")
 h2o.removeAll()
 
-data.hex <- as.h2o(train, destination_frame = "data.hex")
+#Naive/frequentist forecast
+train.13 <- subset(train, !(train$pchar_2=="type 2" | train$pgroup_1 == "group 27940"))
+train.13$pchar_2 <- factor(train.13$pchar_2, levels = c("type 1", "type 3"))
+
+data.hex <- as.h2o(train.13, destination_frame = "data.hex")
 
 ####################################################
 
@@ -68,14 +72,21 @@ fit.gbm <- h2o.gbm(y = y, x = x, distribution = "bernoulli",
 # Predict
 cat("generating predictions \n")
 
-test.hex <- as.h2o(test, destination_frame = "test.hex")
+test.13 <- subset(test, !(test$pchar_2=="type 2" | test$pgroup_1 == "group 27940"))
+test.2 <- subset(test, (test$pchar_2=="type 2" | test$pgroup_1 == "group 27940"))
+
+test.hex <- as.h2o(test.13, destination_frame = "test.hex")
 
 predict <- h2o.predict(fit.gbm, test.hex)[,1]
 predict <- cbind(as.data.frame(test.hex$activity_id), as.data.frame(predict))
-
 names(predict) <- c("activity_id", "outcome")
 
-write.csv(predict, "submission.gbm5.csv", row.names = FALSE, quote = FALSE)
+predict.2 <- cbind(as.data.frame(test.2$activity_id), 0)
+names(predict.2) <- c("activity_id", "outcome")
+
+predict <- rbind(predict, predict.2)
+
+write.csv(predict, "submission.gbm7.csv", row.names = FALSE, quote = FALSE)
 
 cat("finished \n")
 Sys.time()-t

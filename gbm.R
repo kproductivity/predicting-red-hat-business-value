@@ -70,7 +70,7 @@ x1 <- setdiff(names(train1), disregard1)
 
 fit.gbm1 <- h2o.gbm(y = y, x = x1, distribution = "bernoulli",
                     training_frame = train1, nfolds = 10,
-                    ntrees = 100, max_depth = 5, learn_rate = 0.1)
+                    ntrees = 100, max_depth = 3, learn_rate = 0.05)
 
 disregard2 <- c(y, "people_id", "pdate", "date",
                    "char_1", "char_2", "char_3", "char_4", "char_5", 
@@ -98,7 +98,7 @@ predict2 <- cbind(as.data.frame(test2$activity_id), as.data.frame(predict2))
 prediction <- rbind(predict1, predict2)
 names(prediction) <- c("activity_id", "outcome")
 
-write.csv(prediction, "submission.gbm3.csv", row.names = FALSE, quote = FALSE)
+write.csv(prediction, "submission.gbm4.csv", row.names = FALSE, quote = FALSE)
 
 cat("finished \n")
 Sys.time()
